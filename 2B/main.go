@@ -16,25 +16,41 @@ func Abs(x int) int {
 	return x
 }
 
-func chechSafe(levels []int) int {
+func chechSafe(levels []int) bool {
 	direction := 0
 	for i := 0; i < len(levels)-1; i++ {
 		diff := levels[i] - levels[i+1]
 
 		if Abs(diff) < 1 || Abs(diff) > 3 {
-			return i
+			return false
 		}
 
 		if diff*direction < 0 {
-			return i
+			return false
 		}
 		direction = diff
 	}
-	return -1
+	return true
 }
 
-func removeElement(arr []int, i int) []int {
-	return append(arr[:i], arr[i+1:]...)
+func removeElement(report []int, deleteIndex int) []int {
+	copyReport := make([]int, len(report))
+	copy(copyReport, report)
+
+	copyReport = append(copyReport[:deleteIndex], copyReport[deleteIndex+1:]...)
+
+	return copyReport
+}
+
+func checkReportSafetyWithDeletion(reportNum []int) bool {
+	for i := 0; i < len(reportNum); i++ {
+		isSafe := chechSafe(removeElement(reportNum, i))
+		if isSafe {
+			return true
+		}
+	}
+
+	return false
 }
 
 // ProcessFile handles the file reading and processing
@@ -69,16 +85,10 @@ func ProcessFile(filename string) (int, error) {
 
 		safeLevel := chechSafe(levels)
 
-		if safeLevel >= 0 {
-
-			for i := 0; i < len(levels); i++ {
-				safeLevel = chechSafe(removeElement(levels, i))
-				if safeLevel < 0 {
-					safeLevels++
-					break
-				}
+		if !safeLevel {
+			if !checkReportSafetyWithDeletion(levels) {
+				continue
 			}
-			continue
 		}
 
 		safeLevels++

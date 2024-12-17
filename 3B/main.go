@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 func processText(text string) int {
@@ -58,7 +59,18 @@ func ProcessFile(filename string) (int, error) {
 		return -1, err
 	}
 
-	return processText(string(data)), nil
+	initText := string(data)
+
+	// Regex pattern (escaped properly for Go)
+	pattern := `don\'t\(\)(?s).*?(do\(\)|$)`
+
+	re := regexp.MustCompile(pattern)
+
+	nonMatches := re.Split(initText, -1)
+
+	result := strings.Join(nonMatches, "\n")
+
+	return processText(result), nil
 }
 
 func main() {
